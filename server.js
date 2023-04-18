@@ -3,6 +3,7 @@ const dotenv = require("dotenv")
 dotenv.config()
 const dbConnect = require("./config/db/dbConnect")
 const userRoutes = require("./routes/users/userRoute")
+const {errorHandler, notFound} = require("./middlewares/error/errorHandler")
 const app = express()
 
 // db
@@ -14,6 +15,11 @@ app.use(express.json())
 // ROUTES
 // user routes
 app.use("/api/users", userRoutes)
+
+
+// error handler
+app.use(notFound)
+app.use(errorHandler)
 
 // server
 const PORT = process.env.PORT || 5000
