@@ -3,9 +3,10 @@ const expressAsyncHandler = require("express-async-handler")
 
 // REGISTER
 const userRegisterCtrl = expressAsyncHandler(async (req, res) => {
-
+    const { email } = req.body
+    
     // check if the user is already registered
-    const userExists = await User.find({email: req?.body?.email})
+    const userExists = await User.findOne({email})
 
     if (userExists) throw new Error("User already registered")
     
@@ -24,4 +25,22 @@ const userRegisterCtrl = expressAsyncHandler(async (req, res) => {
 
 })
 
-module.exports = {userRegisterCtrl}
+
+// LOGIN
+const userLoginCtrl = expressAsyncHandler(async (req, res) => {
+
+    const { email, password } = req.body
+
+    // check if user exists
+    const user = await User.findOne({ email })
+    
+    // check if password is matched
+    if (user && await user.isPasswordMatched(password)) {
+        res.json(user)
+    } else {
+        res.status(401)
+        throw new Error('Invalid Login Credentials')
+    }
+})
+
+module.exports = {userRegisterCtrl, userLoginCtrl}
