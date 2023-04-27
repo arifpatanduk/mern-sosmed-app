@@ -1,3 +1,4 @@
+const generateToken = require("../../config/token/generateToken")
 const User = require("../../model/user/User")
 const expressAsyncHandler = require("express-async-handler")
 
@@ -36,7 +37,14 @@ const userLoginCtrl = expressAsyncHandler(async (req, res) => {
     
     // check if password is matched
     if (user && await user.isPasswordMatched(password)) {
-        res.json(user)
+        res.json({
+            firstName: user?.firstName,
+            lastName: user?.lastName,
+            email: user?.email,
+            profilePhoto: user?.profilePhoto,
+            isAdmin: user?.isAdmin,
+            token: generateToken(user?._id)
+        })
     } else {
         res.status(401)
         throw new Error('Invalid Login Credentials')
