@@ -1,5 +1,5 @@
 const express = require('express');
-const { userRegisterCtrl, userLoginCtrl, fetchUsersCtrl, deleteUserCtrl } = require('../../controllers/users/UserController');
+const { userRegisterCtrl, userLoginCtrl, fetchUsersCtrl, deleteUserCtrl, userDetailCtrl } = require('../../controllers/users/UserController');
 
 const userRoutes = express.Router()
 
@@ -12,5 +12,6 @@ userRoutes.post("/login", userLoginCtrl)
 // users
 userRoutes.get("/", fetchUsersCtrl)
 userRoutes.delete("/:id", deleteUserCtrl)
+userRoutes.get("/:id", userDetailCtrl)
 
 module.exports = userRoutes
