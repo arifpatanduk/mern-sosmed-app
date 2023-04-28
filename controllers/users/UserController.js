@@ -68,18 +68,6 @@ const userDetailCtrl = expressAsyncHandler(async (req, res) => {
     }
 })
 
-// user profile
-const userProfileCtrl = expressAsyncHandler(async (req, res) => {
-    const { id } = req.params
-    validateMongodbId(id)
-    try {
-        const user = await User.findById(id)
-        res.json(user)
-    } catch (error) {
-        res.json(error)
-    }
-})
-
 // fetch all users
 const fetchUsersCtrl = expressAsyncHandler(async (req, res) => {
     try {
@@ -103,11 +91,46 @@ const deleteUserCtrl = expressAsyncHandler(async (req, res) => {
     }
 })
 
+// USER PROFILE
+// show user profile
+const userProfileCtrl = expressAsyncHandler(async (req, res) => {
+    const { id } = req.params
+    validateMongodbId(id)
+    try {
+        const user = await User.findById(id)
+        res.json(user)
+    } catch (error) {
+        res.json(error)
+    }
+})
+
+// update user profile
+const userUpdateProfileCtrl = expressAsyncHandler(async (req, res) => {
+    const { _id } = req?.user
+    validateMongodbId(_id)
+
+    console.log(req.body);
+
+    const user = await User.findByIdAndUpdate(_id, {
+        firstName: req?.body?.firstName,
+        lastName: req?.body?.lastName,
+        email: req?.body?.email,
+        bio: req?.body?.bio
+    }, {
+        new: true,
+        runValidators: true
+    })
+
+    res.json(user)
+})
+
+
 module.exports = {
     userRegisterCtrl, 
     userLoginCtrl, 
     fetchUsersCtrl, 
     deleteUserCtrl, 
     userDetailCtrl,
-    userProfileCtrl
+    userProfileCtrl,
+    userUpdateProfileCtrl
 }
