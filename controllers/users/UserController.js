@@ -109,8 +109,6 @@ const userUpdateProfileCtrl = expressAsyncHandler(async (req, res) => {
     const { _id } = req?.user
     validateMongodbId(_id)
 
-    console.log(req.body);
-
     const user = await User.findByIdAndUpdate(_id, {
         firstName: req?.body?.firstName,
         lastName: req?.body?.lastName,
@@ -124,6 +122,23 @@ const userUpdateProfileCtrl = expressAsyncHandler(async (req, res) => {
     res.json(user)
 })
 
+// update user password
+const userUpdatePasswordCtrl = expressAsyncHandler(async (req, res) => {
+    const { _id } = req?.user
+    const { password } = req?.body
+    validateMongodbId(_id)
+
+    const user = await User.findById(_id)
+
+    if (password) {
+        user.password = password
+        const updatedUser = await user.save()
+        res.json(updatedUser)
+    }
+    
+    res.json(user)
+})
+
 
 module.exports = {
     userRegisterCtrl, 
@@ -132,5 +147,6 @@ module.exports = {
     deleteUserCtrl, 
     userDetailCtrl,
     userProfileCtrl,
-    userUpdateProfileCtrl
+    userUpdateProfileCtrl,
+    userUpdatePasswordCtrl
 }
