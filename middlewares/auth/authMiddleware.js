@@ -18,13 +18,15 @@ const authMiddleware = expressAsyncHandler(async (req, res, next) => {
                 req.user = user
                 next()
             }
-            else {
-                throw new Error('There is no token attached to the headers')
-            }
         } catch (error) {
             throw new Error(error)
         }
     } 
+    else {
+        throw new Error('There is no token attached to the headers')
+    }
+
+
 })
 
 module.exports = authMiddleware
