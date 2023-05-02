@@ -140,6 +140,36 @@ const userUpdatePasswordCtrl = expressAsyncHandler(async (req, res) => {
 })
 
 
+// FOLLOWING
+// follow
+const userFollowingCtrl = expressAsyncHandler(async (req, res) => {
+    const { followId } = req?.body
+    const loginUserId = req?.user.id
+
+    // validate followId
+    validateMongodbId(followId)
+    const targetUser = await User.findById(followId)
+
+    const alreadyFollowing = targetUser?.followers?.find(
+        user => user?.toString() === loginUserId.toString()
+    )
+
+    if (alreadyFollowing) throw new Error(`You already followed ${targetUser?.firstName} ${targetUser?.lastName}`)
+
+    // update follower in target user
+    await User.findByIdAndUpdate(followId, {
+        $push: {followers: loginUserId}
+    })
+    
+    // update following in current user
+    await User.findByIdAndUpdate(loginUserId, {
+        $push: {following: followId}
+    })
+
+    res.json(`You have successfully followed ${targetUser?.firstName} ${targetUser?.lastName}`)
+})
+
+
 module.exports = {
     userRegisterCtrl, 
     userLoginCtrl, 
@@ -148,5 +178,6 @@ module.exports = {
     userDetailCtrl,
     userProfileCtrl,
     userUpdateProfileCtrl,
-    userUpdatePasswordCtrl
+    userUpdatePasswordCtrl,
+    userFollowingCtrl
 }

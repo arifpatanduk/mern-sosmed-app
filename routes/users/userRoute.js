@@ -7,7 +7,8 @@ const {
     userDetailCtrl,
     userProfileCtrl,
     userUpdateProfileCtrl,
-    userUpdatePasswordCtrl
+    userUpdatePasswordCtrl,
+    userFollowingCtrl
 } = require('../../controllers/users/UserController');
 const authMiddleware = require('../../middlewares/auth/authMiddleware');
 
@@ -27,8 +28,10 @@ userRoutes.get("/:id", userDetailCtrl) // user detail
 // user profile
 userRoutes.get("/profile/:id", authMiddleware, userProfileCtrl) 
 userRoutes.put("/update/:id", authMiddleware, userUpdateProfileCtrl)
-
-// update password
 userRoutes.put("/password", authMiddleware, userUpdatePasswordCtrl)
+
+// following
+userRoutes.put("/follow", authMiddleware, userFollowingCtrl)
+
 
 module.exports = userRoutes
