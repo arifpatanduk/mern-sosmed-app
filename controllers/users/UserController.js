@@ -157,9 +157,8 @@ const userFollowingCtrl = expressAsyncHandler(async (req, res) => {
     if (alreadyFollowing) throw new Error(`You already followed ${targetUser?.firstName} ${targetUser?.lastName}`)
 
     // update follower in target user
-    await User.findByIdAndUpdate(followId, {
-        $push: {followers: loginUserId}
-    })
+    targetUser.followers.push(loginUserId)
+    await targetUser.save()
     
     // update following in current user
     await User.findByIdAndUpdate(loginUserId, {
@@ -168,6 +167,9 @@ const userFollowingCtrl = expressAsyncHandler(async (req, res) => {
 
     res.json(`You have successfully followed ${targetUser?.firstName} ${targetUser?.lastName}`)
 })
+
+// unfollow
+
 
 
 module.exports = {
