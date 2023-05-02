@@ -151,25 +151,54 @@ const userFollowingCtrl = expressAsyncHandler(async (req, res) => {
     const targetUser = await User.findById(followId)
 
     const alreadyFollowing = targetUser?.followers?.find(
-        user => user?.toString() === loginUserId.toString()
+        follower => follower?.toString() === loginUserId.toString()
     )
 
     if (alreadyFollowing) throw new Error(`You already followed ${targetUser?.firstName} ${targetUser?.lastName}`)
-
+    
     // update follower in target user
-    targetUser.followers.push(loginUserId)
-    await targetUser.save()
+    await User.findByIdAndUpdate(followId, {
+        $push: {followers: loginUserId},
+        isFollowing: true
+    }, { new: true })
     
     // update following in current user
     await User.findByIdAndUpdate(loginUserId, {
         $push: {following: followId}
-    })
+    }, { new: true })
 
     res.json(`You have successfully followed ${targetUser?.firstName} ${targetUser?.lastName}`)
 })
 
-// unfollow
 
+// unfollow
+const userUnfollowingCtrl = expressAsyncHandler(async (req, res) => {
+    const { unfollowId } = req?.body
+    const loginUserId = req?.user.id
+
+    // validate followId
+    validateMongodbId(unfollowId)
+    const targetUser = await User.findById(unfollowId)
+
+    const isFollowing = targetUser?.followers?.find(
+        follower => follower?.toString() === loginUserId.toString()
+    )
+
+    if (!isFollowing) throw new Error(`You not following ${targetUser?.firstName} ${targetUser?.lastName}`)
+
+    // remove follower in target user
+    await User.findByIdAndUpdate(unfollowId, {
+        $pull: {followers: loginUserId},
+        isFollowing: false
+    }, { new: true })
+    
+    // remove following in current user
+    await User.findByIdAndUpdate(loginUserId, {
+        $pull: {following: unfollowId}
+    }, { new: true })
+
+    res.json(`You have successfully unfollow ${targetUser?.firstName} ${targetUser?.lastName}`)
+})
 
 
 module.exports = {
@@ -181,5 +210,6 @@ module.exports = {
     userProfileCtrl,
     userUpdateProfileCtrl,
     userUpdatePasswordCtrl,
-    userFollowingCtrl
+    userFollowingCtrl,
+    userUnfollowingCtrl
 }
