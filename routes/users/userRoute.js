@@ -1,6 +1,8 @@
 const express = require('express');
 const { 
     userRegisterCtrl, 
+    generateVerificationTokenCtrl,
+    accountVerification,
     userLoginCtrl, 
     fetchUsersCtrl, 
     deleteUserCtrl, 
@@ -19,6 +21,10 @@ const userRoutes = express.Router()
 
 // register
 userRoutes.post("/register", userRegisterCtrl)
+
+// account verification
+userRoutes.post("/generate-verify-email-token", authMiddleware, generateVerificationTokenCtrl)
+userRoutes.put("/verify-account", authMiddleware, accountVerification)
 
 // login
 userRoutes.post("/login", userLoginCtrl)

@@ -2,6 +2,8 @@ const generateToken = require("../../config/token/generateToken")
 const User = require("../../model/user/User")
 const expressAsyncHandler = require("express-async-handler")
 const validateMongodbId = require("../../utils/validateMongoDBId")
+const sendEmail = require("../../utils/sendEmail")
+const crypto = require('crypto')
 
 // REGISTER
 const userRegisterCtrl = expressAsyncHandler(async (req, res) => {
@@ -25,6 +27,56 @@ const userRegisterCtrl = expressAsyncHandler(async (req, res) => {
         res.json(error)
     }
 
+})
+
+
+// Generate email verification
+const generateVerificationTokenCtrl = expressAsyncHandler (async (req, res) => {
+    const loginUserId = req.user.id
+    const user = await User.findById(loginUserId)
+    try {
+        // generate token
+        const verificationToken = await user.createAccountVerificationToken()
+
+        // save the user
+        await user.save()
+        
+        const resetURL = `If you were requested to verify your account, verify now within 10 minutes, otherwise ignore this message. <a href="http://localhost:3000/verify-account/${verificationToken}">Click to verify</a>`
+        
+        // build message
+        const to = "arifpatanduk2@gmail.com"
+        const subject = "Verify Account"
+        const html = resetURL
+        
+        sendEmail(to, subject, html)
+        res.json(html)
+
+    } catch (error) {
+        console.log(error);
+    }
+})
+
+
+// Account Verification
+const accountVerification = expressAsyncHandler (async (req, res) => {
+    const { token } = req.body
+    const hashedToken = crypto.createHash('sha256').update(token).digest("hex")
+    
+    // find user by token
+    const userFound = await User.findOne({
+        accountVerificationToken: hashedToken,
+        accountVerificationExpires: {$gt: new Date()}
+    })
+
+    if (!userFound) throw new Error ("Token Expired, try again later")
+
+    // update the account verification property
+    userFound.isAccountVerified = true
+    userFound.accountVerificationToken = undefined
+    userFound.accountVerificationExpires = undefined
+
+    await userFound.save()
+    res.json(userFound)
 })
 
 
@@ -228,6 +280,8 @@ const userUnblockCtrl = expressAsyncHandler(async (req, res) => {
 
 module.exports = {
     userRegisterCtrl, 
+    generateVerificationTokenCtrl,
+    accountVerification,
     userLoginCtrl, 
     fetchUsersCtrl, 
     deleteUserCtrl, 
