@@ -1,6 +1,6 @@
 const nodemailer = require("nodemailer")
 
-const sendEmail = async (to, messageContent) => {
+const sendEmail = async (to, subject, html) => {
     try {
         
         // create transporter
@@ -15,14 +15,7 @@ const sendEmail = async (to, messageContent) => {
         })
 
         // message object
-        const message = {
-            to, 
-            subject: "Testing Subject",
-            html: `
-            <h3>Test Heading</h3>
-            <p>${messageContent}</p>
-            `
-        }
+        const message = { to, subject, html }
 
         // send the email
         const info = await transporter.sendMail(message)
