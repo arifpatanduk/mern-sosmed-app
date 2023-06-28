@@ -180,11 +180,11 @@ const userUnfollowingCtrl = expressAsyncHandler(async (req, res) => {
     validateMongodbId(unfollowId)
     const targetUser = await User.findById(unfollowId)
 
-    const isFollowing = targetUser?.followers?.find(
+    const alreadyFollowing = targetUser?.followers?.find(
         follower => follower?.toString() === loginUserId.toString()
     )
 
-    if (!isFollowing) throw new Error(`You not following ${targetUser?.firstName} ${targetUser?.lastName}`)
+    if (!alreadyFollowing) throw new Error(`You not following ${targetUser?.firstName} ${targetUser?.lastName}`)
 
     // remove follower in target user
     await User.findByIdAndUpdate(unfollowId, {
@@ -201,6 +201,31 @@ const userUnfollowingCtrl = expressAsyncHandler(async (req, res) => {
 })
 
 
+// BLOCK USER
+// block
+const userBlockCtrl = expressAsyncHandler(async (req, res) => {
+    const { id } = req?.params
+    validateMongodbId(id)
+
+    const user = await User.findByIdAndUpdate(id, {
+        isBlocked: true
+    }, { new: true })
+
+    res.json(user)
+})
+
+// unblock
+const userUnblockCtrl = expressAsyncHandler(async (req, res) => {
+    const { id } = req?.params
+    validateMongodbId(id)
+
+    const user = await User.findByIdAndUpdate(id, {
+        isBlocked: false
+    }, { new: true })
+
+    res.json(user)
+})
+
 module.exports = {
     userRegisterCtrl, 
     userLoginCtrl, 
@@ -211,5 +236,7 @@ module.exports = {
     userUpdateProfileCtrl,
     userUpdatePasswordCtrl,
     userFollowingCtrl,
-    userUnfollowingCtrl
+    userUnfollowingCtrl,
+    userBlockCtrl,
+    userUnblockCtrl
 }
