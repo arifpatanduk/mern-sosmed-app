@@ -3,6 +3,8 @@ const {
     userRegisterCtrl, 
     generateVerificationTokenCtrl,
     accountVerification,
+    forgetPasswordToken,
+    passwordResetCtrl,
     userLoginCtrl, 
     fetchUsersCtrl, 
     deleteUserCtrl, 
@@ -25,6 +27,11 @@ userRoutes.post("/register", userRegisterCtrl)
 // account verification
 userRoutes.post("/generate-verify-email-token", authMiddleware, generateVerificationTokenCtrl)
 userRoutes.put("/verify-account", authMiddleware, accountVerification)
+
+// forget password
+userRoutes.post("/forget-password-token", forgetPasswordToken)
+userRoutes.put("/reset-password", passwordResetCtrl)
+
 
 // login
 userRoutes.post("/login", userLoginCtrl)

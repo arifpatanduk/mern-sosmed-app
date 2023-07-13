@@ -76,8 +76,70 @@ const accountVerification = expressAsyncHandler (async (req, res) => {
     userFound.accountVerificationExpires = undefined
 
     await userFound.save()
-    res.json(userFound)
+    res.json({
+        message: 'Account verified successfully',
+        data: userFound
+    })
 })
+
+
+// FORGET PASSWORD Token Generator
+const forgetPasswordToken = expressAsyncHandler(async(req, res) => {
+    const { email } = req.body
+
+    // find user by email
+    const user = await User.findOne({ email })
+    
+    // if user is not found
+    if (!user) throw new Error('User not found')
+
+    // if user is found
+    try {
+        const token = await user.createForgetPasswordToken()
+        await user.save()
+
+        // build message
+        const resetURL = `If you were requested to reset your password, reset now within 10 minutes, otherwise ignore this message. <a href="http://localhost:3000/reset-password/${token}">Click to verify</a>`
+        
+        const to = email
+        const subject = "Reset Password"
+        const html = resetURL
+        await sendEmail(to, subject, html)
+
+        res.json({
+            message: `A verification email has been sent to ${to}. Reset now within 10 minutes, otherwise ignore this message. <a href="http://localhost:3000/reset-password/${token}">Click to verify`
+        })
+    } catch (error) {
+        console.log(error);
+    }
+})
+
+
+// PASSWORD RESET 
+const passwordResetCtrl = expressAsyncHandler(async (req, res) => {
+    const {token, password} = req.body
+    const hashedToken = crypto.createHash('sha256').update(token).digest("hex")
+
+    // find user by token
+    const user = await User.findOne({
+        passwordResetToken: hashedToken,
+        passwordResetExpires: {$gt: new Date()}
+    })
+
+    if (!user) throw new Error("Token expired, try again later")
+
+    // update the password
+    user.password = password
+    user.passwordResetToken = undefined
+    user.passwordResetExpires = undefined
+    await user.save()
+
+    res.json({
+        message: "Password updated successfully",
+        data: user
+    })
+}) 
+
 
 
 // LOGIN
@@ -104,6 +166,8 @@ const userLoginCtrl = expressAsyncHandler(async (req, res) => {
         throw new Error('Invalid Login Credentials')
     }
 })
+
+// 
 
 
 // USERS
@@ -282,6 +346,8 @@ module.exports = {
     userRegisterCtrl, 
     generateVerificationTokenCtrl,
     accountVerification,
+    forgetPasswordToken,
+    passwordResetCtrl,
     userLoginCtrl, 
     fetchUsersCtrl, 
     deleteUserCtrl, 
