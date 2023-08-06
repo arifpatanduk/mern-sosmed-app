@@ -3,6 +3,7 @@ const dotenv = require("dotenv")
 dotenv.config()
 const dbConnect = require("./config/db/dbConnect")
 const userRoutes = require("./routes/users/userRoute")
+const authRoutes = require("./routes/auth/authRoute")
 const {errorHandler, notFound} = require("./middlewares/error/errorHandler")
 const app = express()
 
@@ -13,8 +14,12 @@ dbConnect()
 app.use(express.json())
 
 // ROUTES
+// auth routes
+app.use("/api/auth", authRoutes)
+
 // user routes
 app.use("/api/users", userRoutes)
+
 
 
 // error handler
