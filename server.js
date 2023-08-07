@@ -5,6 +5,7 @@ const dbConnect = require("./config/db/dbConnect")
 const userRoutes = require("./routes/users/userRoute")
 const authRoutes = require("./routes/auth/authRoute")
 const {errorHandler, notFound} = require("./middlewares/error/errorHandler")
+const postRoutes = require("./routes/posts/postRoute")
 const app = express()
 
 // db
@@ -19,6 +20,9 @@ app.use("/api/auth", authRoutes)
 
 // user routes
 app.use("/api/users", userRoutes)
+
+// posts routes
+app.use("/api/posts", postRoutes)
 
 
 
