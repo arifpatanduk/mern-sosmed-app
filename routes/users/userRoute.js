@@ -9,10 +9,12 @@ const {
     userFollowingCtrl,
     userUnfollowingCtrl,
     userBlockCtrl,
-    userUnblockCtrl
+    userUnblockCtrl,
+    profilePhotoUploadCtrl
 } = require('../../controllers/users/UserController');
 
 const authMiddleware = require('../../middlewares/auth/authMiddleware');
+const { profilePhotoUpload, profilePhotoResize } = require('../../middlewares/uploads/profilePhotoUpload');
 
 const userRoutes = express.Router()
 
@@ -33,5 +35,13 @@ userRoutes.put("/unfollow", authMiddleware, userUnfollowingCtrl)
 // block
 userRoutes.put("/block/:id", authMiddleware, userBlockCtrl)
 userRoutes.put("/unblock/:id", authMiddleware, userUnblockCtrl)
+
+// profile photo upload
+userRoutes.put(
+    "/profile-photo-upload", 
+    authMiddleware, 
+    profilePhotoUpload.single('image'), 
+    profilePhotoResize,
+    profilePhotoUploadCtrl)
 
 module.exports = userRoutes

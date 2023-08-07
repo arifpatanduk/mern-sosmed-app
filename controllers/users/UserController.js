@@ -1,10 +1,8 @@
-const generateToken = require("../../config/token/generateToken")
 const User = require("../../model/user/User")
 const expressAsyncHandler = require("express-async-handler")
 const validateMongodbId = require("../../utils/validateMongoDBId")
-const sendEmail = require("../../utils/sendEmail")
-const crypto = require('crypto')
-
+const cloudinaryUploadImg = require("../../utils/cloudinary")
+const fs = require('fs/promises');
 
 // USERS
 
@@ -178,6 +176,29 @@ const userUnblockCtrl = expressAsyncHandler(async (req, res) => {
     res.json(user)
 })
 
+
+// profile photo upload
+const profilePhotoUploadCtrl = expressAsyncHandler(async (req, res) => {
+    
+    // get image path
+    const localPath = `public/images/profile/${req.file.filename}`
+
+    // upload image to cloudinary
+    const uploadedImg = await cloudinaryUploadImg(localPath)
+    
+    // find user and update the profile photo
+    const { _id } = req.user
+    const foundUser = await User.findByIdAndUpdate(_id, {
+        profilePhoto : uploadedImg?.url
+    }, {new : true})
+
+    // delete temporary profile photo after successfully updated
+    await fs.unlink(localPath);
+
+    res.json(foundUser)
+})
+
+
 module.exports = {
     fetchUsersCtrl, 
     deleteUserCtrl, 
@@ -188,5 +209,6 @@ module.exports = {
     userFollowingCtrl,
     userUnfollowingCtrl,
     userBlockCtrl,
-    userUnblockCtrl
+    userUnblockCtrl,
+    profilePhotoUploadCtrl
 }
